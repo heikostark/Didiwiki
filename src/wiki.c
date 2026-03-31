@@ -111,17 +111,58 @@ wiki_get_searchpages ( int  *n_pages, char *url, char *expr )
 
 /* ******************************************************************************** */
 
+/* Sanitize a location string so it is safe to use in HTTP headers.
+ * Currently removes CR/LF characters to prevent header injection.
+ */
+static char*
+sanitize_location_for_header ( const char *location )
+{
+    size_t len, i, j;
+    char  *clean;
+
+    if ( location == NULL ) return NULL;
+
+    len = strlen ( location );
+    clean = malloc ( len + 1 );
+    if ( !clean ) return NULL;
+
+    for ( i = 0, j = 0; i < len; i++ ) {
+        if ( location[i] == '\r' || location[i] == '\n' )
+            continue;
+        clean[j++] = location[i];
+    }
+    clean[j] = '\0';
+
+    return clean;
+}
+
 int
 wiki_redirect ( HttpResponse *res, char *location ) /* Redirect */
 {
-    int   header_len = strlen ( location ) + 14;
-    char *header = alloca ( sizeof ( char ) *header_len );
+    char  *clean_location;
+    int    header_len;
+    char  *header;
 
-    snprintf ( header, header_len, "Location: %s\r\n", location );
+    clean_location = sanitize_location_for_header ( location );
+    if ( clean_location == NULL ) {
+        /* Fallback: no valid location, send a generic response */
+        http_response_printf ( res, "<html>\n<p>Redirect</p>\n</html>\n" );
+        http_response_set_status ( res, 302, "Moved Temporarily" );
+        http_response_send ( res );
+        exit ( 0 );
+    }
+
+    header_len = strlen ( clean_location ) + 14;
+    header = alloca ( sizeof ( char ) *header_len );
+
+    snprintf ( header, header_len, "Location: %s\r\n", clean_location );
     http_response_append_header ( res, header );
-    http_response_printf ( res, "<html>\n<p>Redirect to %s</p>\n</html>\n", location );
+    http_response_printf ( res, "<html>\n<p>Redirect to %s</p>\n</html>\n", clean_location );
     http_response_set_status ( res, 302, "Moved Temporarily" );
     http_response_send ( res );
+
+    free ( clean_location );
+
     exit ( 0 );
 }
 
