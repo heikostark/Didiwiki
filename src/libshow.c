@@ -369,6 +369,7 @@ wiki_show_included_category_results_page ( HttpResponse *res, char *expr ) /* In
 
     if ( expr == NULL || strlen ( expr ) == 0 ) {
         http_response_printf ( res, "No Category Terms supplied" );
+        return;
     }
 
     newexpr = malloc ( sizeof ( char ) * ( strlen ( expr )+10 + 1 ) );
