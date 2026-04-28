@@ -366,16 +366,21 @@ wiki_show_included_category_results_page ( HttpResponse *res, char *expr ) /* In
     WikiPageList **pages = NULL;
     int            n_pages, i;
     char          *newexpr = "";
+    size_t         expr_len, newexpr_size;
 
     if ( expr == NULL || strlen ( expr ) == 0 ) {
         http_response_printf ( res, "No Category Terms supplied" );
         return;
     }
 
-    newexpr = malloc ( sizeof ( char ) * ( strlen ( expr )+10 + 1 ) );
-    memset ( newexpr, 0, sizeof ( char ) * ( strlen ( expr )+10 + 1 ) );
-    strcpy ( newexpr, "[Category:" );
-    strcat ( newexpr,expr );
+    expr_len = strlen ( expr );
+    newexpr_size = expr_len + 10 + 1;
+    newexpr = malloc ( sizeof ( char ) * newexpr_size );
+    if ( newexpr == NULL ) {
+        http_response_printf ( res, "No category matches!" );
+        return;
+    }
+    snprintf ( newexpr, newexpr_size, "[Category:%s", expr );
     pages = wiki_get_searchpages ( &n_pages, datadir, newexpr );
     if ( pages ) {
         for ( i=0; i<n_pages; i++ )
