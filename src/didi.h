@@ -70,11 +70,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <time.h>
 #include <sys/times.h>
 #include <sys/time.h>
 #include <sys/wait.h>
-#include <ctype.h>
 #include <sys/stat.h>
 #include <dirent.h>
 

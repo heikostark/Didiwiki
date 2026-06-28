@@ -52,7 +52,7 @@ check_for_link ( char *line, int *skip_chars )
                 !strncasecmp ( p, "category:", 9 ) ||
                 !strncasecmp ( p, "frame:", 6 ) ||
                 !strncasecmp ( p, "image:", 6 ) || !strncasecmp ( p, "image100:", 9 ) || !strncasecmp ( p, "image50:", 8 ) ||
-                !strncasecmp ( p, "image66:", 6 ) || !strncasecmp ( p, "image33:", 8 ) || !strncasecmp ( p, "image25:", 8 ) ||
+                !strncasecmp ( p, "image66:", 8 ) || !strncasecmp ( p, "image33:", 8 ) || !strncasecmp ( p, "image25:", 8 ) ||
                 !strncasecmp ( p, "smallicon:", 10 ) || !strncasecmp ( p, "icon:", 5 ) ||  !strncasecmp ( p, "bigicon:", 8 ) ) {
             /* http, mailto, file and category has no included space chars */
             while ( *p != ']' && *p != '\0' && *p != '|' && !isspace ( *p ) ) p++;
@@ -141,7 +141,7 @@ check_for_link ( char *line, int *skip_chars )
                 } 
                 else if ( !strncasecmp ( url, "image100:", 9 ) ) 
                 { /* regular images */
-                    strncpy ( image, url+8, p-url );
+                    strncpy ( image, url+9, p-url );
                     if ( !strncasecmp ( image, "http://", 7 ) || !strncasecmp ( image, "https://", 8 ) ) {
                         if ( title2 ) asprintf ( &result, "<img style='width:100%%;%s' alt='%s' src='%s' border='0'>", title, title2, image );
                         else if ( title ) asprintf ( &result, "<img style='width:100%%' alt='%s' src='%s' border='0'>", title, image );

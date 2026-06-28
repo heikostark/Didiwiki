@@ -139,9 +139,9 @@ http_request_param_showall ( HttpRequest *req, HttpResponse *res )
     for ( i=0; i<req->n_params; i++ ) {
         /*http_response_printf(res, "%s", i);
         http_response_printf(res, "<br>\n"); */
-        http_response_printf ( res, req->params[i].key );
+        http_response_printf ( res, "%s", req->params[i].key );
         http_response_printf ( res, "<br>\n" );
-        http_response_printf ( res, req->params[i].val );
+        http_response_printf ( res, "%s", req->params[i].val ? req->params[i].val : "" );
         http_response_printf ( res, "<br>\n" );
     }
     http_response_printf ( res, "</body></html>\n" );
@@ -275,7 +275,7 @@ http_request_new ( void )
     if ( len && content_type ) {
         /* XXX multipart/form-data not handled .. yet XXX */
         /* only handle application/x-www-form-urlencoded  */
-        if ( strncmp ( content_type,"application/x-www-form-urlencoded",19 ) != 0 ) malformed_request();
+        if ( strncmp ( content_type,"application/x-www-form-urlencoded",33 ) != 0 ) malformed_request();
 
         post_data = malloc ( len+1 );
         len = fread ( post_data, 1, len, stdin );
@@ -347,9 +347,9 @@ http_response_printf ( HttpResponse *res, const char *format, ... )
         memcpy ( res->data, tmp, strlen ( tmp )+1 );
         res->data_len_alloced = strlen ( tmp )+1;
     } else {
-        res->data = realloc ( res->data, res->data_len + strlen ( tmp ) );
+        res->data = realloc ( res->data, res->data_len + strlen ( tmp ) + 1 );
         memcpy ( res->data + res->data_len - 1, tmp, strlen ( tmp )+1 );
-        res->data_len_alloced = res->data_len + strlen ( tmp );
+        res->data_len_alloced = res->data_len + strlen ( tmp ) + 1;
     }
 
     res->data_len = strlen ( res->data )+1;

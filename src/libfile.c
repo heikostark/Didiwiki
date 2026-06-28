@@ -18,7 +18,8 @@ changes_compar ( const struct dirent **d1, const struct dirent **d2 )
     stat ( ( *d1 )->d_name, &st1 );
     stat ( ( *d2 )->d_name, &st2 );
     if ( st1.st_mtime > st2.st_mtime ) return 1;
-    else return -1;
+    else if ( st1.st_mtime < st2.st_mtime ) return -1;
+    else return 0;
 }
 
 static char *
@@ -60,7 +61,7 @@ file_write ( char *filename, char *data )
 {
     FILE*       fp;
     int         bytes_written = 0;
-    int         len           = strlen ( data )+1;
+    int         len           = strlen ( data );
 
     if ( ! ( fp = fopen ( filename, "wb" ) ) ) return -1;
     while ( len > 0 ) {
