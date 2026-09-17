@@ -43,15 +43,28 @@ file_read ( char *filename )
 static char *
 file_read_bin ( char *filename, int *len )
 {
-    struct stat st;
     FILE*       fp;
     char        *str = "";
+    long        file_size;
 
-    /* Get the file size. */
-    if ( stat ( filename, &st ) ) return NULL;
     if ( ! ( fp = fopen ( filename, "rb" ) ) ) return NULL;
-    str = malloc ( sizeof ( char ) * ( st.st_size + 1 ) );
-    *len = fread ( str, 1, st.st_size, fp );
+    if ( fseek ( fp, 0, SEEK_END ) != 0 ) {
+        fclose ( fp );
+        return NULL;
+    }
+    file_size = ftell ( fp );
+    if ( file_size < 0 ) {
+        fclose ( fp );
+        return NULL;
+    }
+    rewind ( fp );
+
+    str = malloc ( sizeof ( char ) * ( file_size + 1 ) );
+    if ( str == NULL ) {
+        fclose ( fp );
+        return NULL;
+    }
+    *len = fread ( str, 1, file_size, fp );
     fclose ( fp );
     return str;
 }
