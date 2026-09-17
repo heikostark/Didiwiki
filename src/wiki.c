@@ -726,31 +726,47 @@ wiki_handle_http_request ( HttpRequest *req )
             }
         }
         /* Show page with action */
-        if ( access ( page, R_OK ) == 0 ) {	/* page exists */
-            if ( !strcasecmp ( command, "Edit" ) ) { /* print edit page */
-                chdir ( datadir );
-                wikitext = file_read ( page );
+        if ( !strcasecmp ( command, "Edit" ) ) { /* print edit page */
+            chdir ( datadir );
+            wikitext = file_read ( page );
+            if ( wikitext ) {
                 wiki_show_edit_page ( res, wikitext, page );
-            } else if ( !strcasecmp ( command, "Trash" ) ) { /* to trash */
-                file_copy ( datadir,page,trashdir,page );
-                chdir ( datadir );
-                remove ( page );
-                wiki_show_search_results_page ( res, "*" );
-            } else if ( !strcasecmp ( command, "Include" ) ) { /* to include */
-                file_copy ( datadir,page,includedir,page );
-                chdir ( datadir );
-                remove ( page );
-                wiki_show_search_results_page ( res, "*" );
-            } else if ( !strcasecmp ( command, "Secret" ) ) { /* to secret */
-                file_copy ( datadir,page,secretdir,page );
-                chdir ( datadir );
-                remove ( page );
-                wiki_show_search_results_page ( res, "*" );
-            } else { /* show page */
-                wikitext = file_read ( page );
-                wiki_show_page ( res, wikitext, page );
+            } else {
+                wiki_show_create_page ( res );
             }
-        } else {	/* page do not exists */
+        } else if ( !strcasecmp ( command, "Trash" ) ) { /* to trash */
+            file_copy ( datadir,page,trashdir,page );
+            chdir ( datadir );
+            if ( remove ( page ) == 0 ) {
+                wiki_show_search_results_page ( res, "*" );
+            } else {
+                wiki_show_create_page ( res );
+            }
+        } else if ( !strcasecmp ( command, "Include" ) ) { /* to include */
+            file_copy ( datadir,page,includedir,page );
+            chdir ( datadir );
+            if ( remove ( page ) == 0 ) {
+                wiki_show_search_results_page ( res, "*" );
+            } else {
+                wiki_show_create_page ( res );
+            }
+        } else if ( !strcasecmp ( command, "Secret" ) ) { /* to secret */
+            file_copy ( datadir,page,secretdir,page );
+            chdir ( datadir );
+            if ( remove ( page ) == 0 ) {
+                wiki_show_search_results_page ( res, "*" );
+            } else {
+                wiki_show_create_page ( res );
+            }
+        } else { /* show page */
+            wikitext = file_read ( page );
+            if ( wikitext ) {
+                wiki_show_page ( res, wikitext, page );
+            } else {
+                wiki_show_create_page ( res );
+            }
+        }
+        if ( 0 ) {	/* page do not exists */
             if ( !strcasecmp ( command, "Create" ) || ( name != NULL ) ) {
                 wiki_show_edit_page ( res, NULL, page );
             } else if ( !strcasecmp ( command, "Editinclude" ) ) { /* print edit page */
