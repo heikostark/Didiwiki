@@ -112,7 +112,8 @@ wiki_get_searchpages ( int  *n_pages, char *url, char *expr )
 /* ******************************************************************************** */
 
 /* Sanitize a location string so it is safe to use in HTTP headers.
- * Currently removes CR/LF characters to prevent header injection.
+ * Keep only visible ASCII and strip CR/LF/control characters to prevent
+ * header injection through untrusted input.
  */
 static char*
 sanitize_location_for_header ( const char *location )
@@ -127,9 +128,15 @@ sanitize_location_for_header ( const char *location )
     if ( !clean ) return NULL;
 
     for ( i = 0, j = 0; i < len; i++ ) {
-        if ( location[i] == '\r' || location[i] == '\n' )
+        unsigned char ch = ( unsigned char ) location[i];
+
+        if ( ch == '\r' || ch == '\n' )
             continue;
-        clean[j++] = location[i];
+
+        if ( ch < 0x20 || ch > 0x7E )
+            continue;
+
+        clean[j++] = ( char ) ch;
     }
     clean[j] = '\0';
 
