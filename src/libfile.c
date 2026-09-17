@@ -30,10 +30,16 @@ file_read ( char *filename )
     char        *str = "";
     int         len;
 
-    /* Get the file size. */
-    if ( stat ( filename, &st ) ) return NULL;
     if ( ! ( fp = fopen ( filename, "rb" ) ) ) return NULL;
+    if ( fstat ( fileno ( fp ), &st ) ) {
+        fclose ( fp );
+        return NULL;
+    }
     str = malloc ( sizeof ( char ) * ( st.st_size + 1 ) );
+    if ( str == NULL ) {
+        fclose ( fp );
+        return NULL;
+    }
     len = fread ( str, 1, st.st_size, fp );
     if ( len >= 0 ) str[len] = '\0';
     fclose ( fp );
