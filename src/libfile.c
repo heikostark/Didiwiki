@@ -76,23 +76,33 @@ file_write ( char *filename, char *data )
 static int
 file_copy ( char *dir, char *filename, char *dir2, char *filename2 )
 {
-    struct stat st;
     FILE*       fp;
     char        *data = "";
     int         len;
+    long        file_size;
     int         bytes_written = 0;
 
     /* read file */
     chdir ( dir );
-    if ( stat ( filename, &st ) ) return -1;
-    data = malloc ( sizeof ( char ) * ( st.st_size + 1 ) );
-    if ( data==NULL ) return -1;
-
-    if ( ! ( fp = fopen ( filename, "rb" ) ) ) {
-        free ( data );
+    if ( ! ( fp = fopen ( filename, "rb" ) ) ) return -1;
+    if ( fseek ( fp, 0, SEEK_END ) != 0 ) {
+        fclose ( fp );
         return -1;
     }
-    len = fread ( data, sizeof ( char ), st.st_size, fp );
+    file_size = ftell ( fp );
+    if ( file_size < 0 ) {
+        fclose ( fp );
+        return -1;
+    }
+    rewind ( fp );
+
+    data = malloc ( sizeof ( char ) * ( file_size + 1 ) );
+    if ( data==NULL ) {
+        fclose ( fp );
+        return -1;
+    }
+
+    len = fread ( data, sizeof ( char ), file_size, fp );
     fclose ( fp );
 
     /* write file */
